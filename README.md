@@ -1,4 +1,4 @@
-# 모아 · 우리 가족 학원 시간표
+# 은상 · 우리 가족 학원 시간표
 
 GitHub에 올려 직접 운영할 수 있는 독립 웹앱입니다. ChatGPT Sites나 ChatGPT 로그인이 필요하지 않습니다. 아이폰·갤럭시에서 같은 주소와 가족 비밀번호를 사용합니다.
 
@@ -66,7 +66,7 @@ npm run vapid
 
 1. iOS 16.4 이상에서 Safari로 앱 주소를 엽니다.
 2. 공유 → **홈 화면에 추가**를 누릅니다. ‘웹 앱으로 열기’ 옵션이 보이면 켭니다.
-3. 홈 화면의 모아 아이콘으로 실행하고 로그인합니다.
+3. 홈 화면의 은상 아이콘으로 실행하고 로그인합니다.
 4. **알림 설정 → 이 기기 알림 켜기 → 허용**을 누릅니다.
 5. **테스트 알림**을 누르고 도착을 확인합니다.
 
@@ -95,7 +95,7 @@ GitHub에 새 저장소를 만든 후 **이 폴더의 내용**을 올립니다. 
 ```sh
 git init
 git add .
-git commit -m "Create Moa family schedule app"
+git commit -m "Create Eunsang family schedule app"
 git branch -M main
 git remote add origin https://github.com/YOUR_ACCOUNT/YOUR_REPOSITORY.git
 git push -u origin main
@@ -121,7 +121,7 @@ Docker를 사용하는 경우:
 docker compose up -d --build
 ```
 
-`compose.yaml`은 데이터를 `moa-data` 볼륨에 저장하고 3000번 포트를 엽니다. **HTTPS 인증서와 도메인은 따로 연결**해야 합니다. 자동으로 도메인을 발급하지 않습니다. 기존 포트와 충돌하면 외부 포트를 조정하세요.
+`compose.yaml`은 데이터를 `eunsang-data` 볼륨에 저장하고 3000번 포트를 엽니다. **HTTPS 인증서와 도메인은 따로 연결**해야 합니다. 자동으로 도메인을 발급하지 않습니다. 기존 포트와 충돌하면 외부 포트를 조정하세요.
 
 ### 백업과 비밀번호 변경
 

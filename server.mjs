@@ -12,7 +12,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.resolve(process.env.DATA_DIR || path.join(root,'data'));
 mkdirSync(dataDir,{recursive:true});
 await mkdir(path.join(dataDir,'photos'),{recursive:true});
-const db = new DatabaseSync(path.join(dataDir,'moa.sqlite'));
+const db = new DatabaseSync(path.join(dataDir,'eunsang.sqlite'));
 db.exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;
 CREATE TABLE IF NOT EXISTS events(id TEXT PRIMARY KEY, json TEXT NOT NULL, version INTEGER NOT NULL DEFAULT 1);
 CREATE TABLE IF NOT EXISTS tasks(id TEXT PRIMARY KEY, eventId TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE, json TEXT NOT NULL);
@@ -43,7 +43,7 @@ function limit(key,max,windowMs) {
   if(++slot.count>max)throw fail(429,'잠시 후 다시 시도해 주세요.');
 }
 function session(req) {
-  const token = /(?:^|;\s*)moa=([a-f0-9]+)/.exec(req.headers.cookie || '')?.[1];
+  const token = /(?:^|;\s*)eunsang=([a-f0-9]+)/.exec(req.headers.cookie || '')?.[1];
   return token && db.prepare('SELECT token FROM sessions WHERE token=? AND expires>?').get(hash(token),Date.now());
 }
 function safeSubscription(sub) {
@@ -106,10 +106,10 @@ const server=http.createServer(async(req,res)=>{
         const b=await body(req);const supplied=createHash('sha256').update(String(b.password || '')).digest();
         if(!timingSafeEqual(supplied,createHash('sha256').update(password).digest()))throw fail(401,'비밀번호가 맞지 않아요.');
         const token=randomBytes(32).toString('hex');db.prepare('INSERT INTO sessions VALUES(?,?)').run(hash(token),Date.now()+30*86400000);
-        res.setHeader('Set-Cookie',`moa=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2592000${secure?'; Secure':''}`);return json(res,200,{ok:true});
+        res.setHeader('Set-Cookie',`eunsang=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=2592000${secure?'; Secure':''}`);return json(res,200,{ok:true});
       }
       if(!session(req))throw fail(401,'가족 비밀번호로 로그인해 주세요.');
-      if(p==='/api/logout' && req.method==='POST') {db.prepare('DELETE FROM sessions WHERE token=?').run(session(req).token);res.setHeader('Set-Cookie','moa=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');return json(res,200,{ok:true});}
+      if(p==='/api/logout' && req.method==='POST') {db.prepare('DELETE FROM sessions WHERE token=?').run(session(req).token);res.setHeader('Set-Cookie','eunsang=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0');return json(res,200,{ok:true});}
       if(p==='/api/state' && req.method==='GET')return json(res,200,{events:events(),tasks:tasks(),pushReady,aiReady:!!process.env.OPENAI_API_KEY,vapidPublicKey:process.env.VAPID_PUBLIC_KEY || ''});
       if(p==='/api/events' && req.method==='POST') {const v=validateEvent(await body(req));const id=randomUUID();db.prepare('INSERT INTO events(id,json) VALUES(?,?)').run(id,JSON.stringify(v));return json(res,201,{...v,id,version:1});}
       const match=/^\/api\/events\/([a-f0-9-]+)$/.exec(p);
@@ -139,7 +139,7 @@ const server=http.createServer(async(req,res)=>{
       if(pm && req.method==='GET'){const row=db.prepare('SELECT mime FROM photos WHERE id=?').get(pm[1]);if(!row)throw fail(404,'사진이 없어요.');res.writeHead(200,{'Content-Type':row.mime,'Cache-Control':'private, no-store'});return res.end(await readFile(path.join(dataDir,'photos',pm[1])));}
       if(p==='/api/push' && req.method==='POST'){if(!pushReady)throw fail(503,'서버 알림 키를 먼저 설정해 주세요.');const sub=safeSubscription(await body(req));db.prepare('INSERT OR REPLACE INTO subscriptions VALUES(?,?)').run(sub.endpoint,JSON.stringify(sub));return json(res,200,{ok:true});}
       if(p==='/api/push' && req.method==='DELETE'){const b=await body(req);db.prepare('DELETE FROM subscriptions WHERE endpoint=?').run(String(b.endpoint));return json(res,200,{ok:true});}
-      if(p==='/api/push/test' && req.method==='POST'){limit('push-test',10,60000);const b=await body(req),row=db.prepare('SELECT json FROM subscriptions WHERE endpoint=?').get(String(b.endpoint));if(!row || !pushReady)throw fail(400,'먼저 이 기기의 알림을 켜 주세요.');try{await send(JSON.parse(row.json),{title:'모아 알림이 연결됐어요',body:'수업과 준비물 알림을 이 기기에서 받을 수 있어요.',key:'test'});}catch{throw fail(502,'알림 전송에 실패했어요. 알림을 껐다 켜고 다시 시도해 주세요.');}return json(res,200,{ok:true});}
+      if(p==='/api/push/test' && req.method==='POST'){limit('push-test',10,60000);const b=await body(req),row=db.prepare('SELECT json FROM subscriptions WHERE endpoint=?').get(String(b.endpoint));if(!row || !pushReady)throw fail(400,'먼저 이 기기의 알림을 켜 주세요.');try{await send(JSON.parse(row.json),{title:'은상 알림이 연결됐어요',body:'수업과 준비물 알림을 이 기기에서 받을 수 있어요.',key:'test'});}catch{throw fail(502,'알림 전송에 실패했어요. 알림을 껐다 켜고 다시 시도해 주세요.');}return json(res,200,{ok:true});}
       throw fail(404,'요청을 찾을 수 없어요.');
     }
     if(!['GET','HEAD'].includes(req.method))throw fail(405,'지원하지 않는 요청입니다.');
@@ -149,6 +149,6 @@ const server=http.createServer(async(req,res)=>{
     res.writeHead(200,{'Content-Type':mime[path.extname(file)] || 'application/octet-stream','Cache-Control':'no-cache'});res.end(await readFile(file));
   }catch(e){json(res,e.status || (e.message?.includes('입력') || e.message?.includes('확인')?400:500),{error:e.status || e.message?.includes('입력') || e.message?.includes('확인')?e.message:'처리하지 못했어요. 잠시 후 다시 시도해 주세요.'});}
 });
-server.listen(Number(process.env.PORT || 3000),process.env.HOST || '0.0.0.0',()=>console.log(`모아 실행 중: ${origin}`));
+server.listen(Number(process.env.PORT || 3000),process.env.HOST || '0.0.0.0',()=>console.log(`은상 실행 중: ${origin}`));
 function shutdown(){clearInterval(timer);server.close(()=>{db.close();process.exit(0);});}
 process.on('SIGTERM',shutdown);process.on('SIGINT',shutdown);

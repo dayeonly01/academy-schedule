@@ -97,8 +97,8 @@ $('#notificationButton').onclick=()=>{$('#pushStatus').textContent=state.pushRea
 function decodeKey(s){const p='='.repeat((4-s.length%4)%4);return Uint8Array.from(atob((s+p).replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));}
 $('#enablePush').onclick=()=>run(async()=>{
   if(!state.pushReady)throw new Error('서버의 VAPID 알림 키를 먼저 설정해 주세요.');
-  if(!('Notification' in window) || !('PushManager' in window))throw new Error('아이폰이라면 홈 화면에 추가한 모아에서 열어 주세요. HTTPS 접속도 필요해요.');
-  const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('휴대폰 설정에서 모아의 알림을 허용해 주세요.');
+  if(!('Notification' in window) || !('PushManager' in window))throw new Error('아이폰이라면 홈 화면에 추가한 은상에서 열어 주세요. HTTPS 접속도 필요해요.');
+  const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('휴대폰 설정에서 은상의 알림을 허용해 주세요.');
   registration=await navigator.serviceWorker.ready;const sub=await registration.pushManager.getSubscription() || await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(state.vapidPublicKey)});await api('/api/push',{method:'POST',body:JSON.stringify(sub)});$('#pushStatus').textContent='이 기기의 알림이 켜졌어요. 테스트 알림을 눌러 확인해 보세요.';
 });
 $('#testPush').onclick=()=>run(async()=>{if(!registration)throw new Error('먼저 알림을 켜 주세요.');const sub=await registration.pushManager.getSubscription();if(!sub)throw new Error('먼저 알림을 켜 주세요.');await api('/api/push/test',{method:'POST',body:JSON.stringify({endpoint:sub.endpoint})});toast('테스트 알림을 보냈어요.');});

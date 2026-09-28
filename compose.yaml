@@ -1,5 +1,5 @@
 services:
-  moa:
+  eunsang:
     build: .
     restart: unless-stopped
     ports:
@@ -8,6 +8,6 @@ services:
     environment:
       DATA_DIR: /app/data
     volumes:
-      - moa-data:/app/data
+      - eunsang-data:/app/data
 volumes:
-  moa-data:
+  eunsang-data:
