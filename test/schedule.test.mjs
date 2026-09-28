@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {dueNotifications,occurs,atKST,dateKey,validDate,validateEvent} from '../schedule.mjs';
+const event={id:'math',title:'수학',date:'2026-09-28',start:960,end:1020,repeat:true,remind:true};
+test('Korean midnight is independent of the server timezone',()=>{assert.equal(dateKey(Date.parse('2026-09-27T15:00:00Z')),'2026-09-28');assert.equal(atKST('2026-09-28',960),Date.parse('2026-09-28T07:00:00Z'));});
+test('weekly recurrence honors start and end',()=>{assert.equal(occurs(event,'2026-10-05'),true);assert.equal(occurs(event,'2026-09-21'),false);assert.equal(occurs(event,'2026-09-29'),false);assert.equal(occurs({...event,until:'2026-10-01'},'2026-10-05'),false);});
+test('class reminder is due ten minutes before, with bounded catchup',()=>{const due=atKST('2026-09-28',950);assert.equal(dueNotifications([event],[],due-1).length,0);assert.equal(dueNotifications([event],[],due).length,1);assert.equal(dueNotifications([event],[],due+299999).length,1);assert.equal(dueNotifications([event],[],due+300000).length,0);assert.equal(dueNotifications([{...event,remind:false}],[],due).length,0);});
+test('next-day homework reminder at 20:00 skips completed tasks',()=>{const task={id:'t',eventId:'math',date:'2026-09-28',text:'교재',done:false};const now=atKST('2026-09-27',1200);assert.equal(dueNotifications([event],[task],now).length,1);assert.equal(dueNotifications([event],[{...task,done:true}],now).length,0);});
+test('midnight class reminder can fall on previous day',()=>{assert.equal(dueNotifications([{...event,start:5,end:60}],[],atKST('2026-09-27',1435)).length,1);});
+test('invalid dates and durations rejected',()=>{assert.equal(validDate('2026-02-30'),false);assert.throws(()=>validateEvent({...event,end:900}));assert.throws(()=>validateEvent({...event,title:''}));assert.throws(()=>validateEvent({...event,date:'bad'}));});

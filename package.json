@@ -1,0 +1,14 @@
+{
+  "name": "moa-academy-schedule",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24.0.0" },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.mjs",
+    "dev": "node --watch --env-file-if-exists=.env server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "vapid": "node scripts/vapid.mjs"
+  },
+  "dependencies": { "web-push": "3.6.7" }
+}
