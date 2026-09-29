@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { importReferenceSchedule } from './reference-schedule.mjs';
 import { readFile, mkdir, writeFile, unlink } from 'node:fs/promises';
 import { existsSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS sent(key TEXT NOT NULL, endpoint TEXT NOT NULL, sentA
 CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY, expires INTEGER NOT NULL);`);
 const password = process.env.FAMILY_PASSWORD;
 if (!password || password.length < 12 || password === 'replace-with-your-own-long-password') throw new Error('먼저 .env에 12자 이상의 FAMILY_PASSWORD를 설정해 주세요.');
+importReferenceSchedule(db);
 const origin = process.env.APP_ORIGIN || 'http://localhost:3000';
 const secure = new URL(origin).protocol === 'https:';
 const pushReady = !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);

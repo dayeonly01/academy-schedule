@@ -25,7 +25,7 @@ test('family API protects data, persists schedules, rejects conflicts and handle
     let state=(await call('/api/state')).data;assert.equal(state.tasks[0].date,'2026-10-06');
     const photo=await call('/api/photos','POST',{image:'data:image/png;base64,iVBORw0KGgo='});assert.equal(photo.status,200);assert.equal(photo.data.auto,false);assert.match(photo.data.reason,/API/);
     const csrf=await fetch(origin+'/api/events',{method:'POST',headers:{Cookie:cookie,'Content-Type':'application/json'},body:JSON.stringify(e)});assert.equal(csrf.status,403);
-    await stop();await start();state=(await call('/api/state')).data;assert.equal(state.events[0].title,'수학');assert.equal(state.tasks.length,1);
+    await stop();await start();state=(await call('/api/state')).data;assert.equal(state.events.find(item=>item.id===e.id).title,'수학');assert.equal(state.tasks.length,1);
     await call(`/api/events/${e.id}`,'DELETE');assert.equal((await call('/api/state')).data.tasks.length,0);
   }finally{await stop();await rm(dir,{recursive:true,force:true});}
 });

@@ -1,7 +1,7 @@
 const $=s=>document.querySelector(s);
 const days=['월','화','수','목','금','토','일'];
 const DAY=86400000;
-let state={events:[],tasks:[]},week=monday(today()),photoId=null,drag=null,busy=false;
+let state={events:[],tasks:[]},week=monday(today()),photoId=null,drag=null,busy=false,view='table';
 function today(){return new Date(Date.now()+9*3600000).toISOString().slice(0,10);}
 function plus(date,n){return new Date(Date.parse(date)+n*DAY).toISOString().slice(0,10);}
 function monday(date){return plus(date,-((new Date(date).getUTCDay()+6)%7));}
@@ -18,6 +18,28 @@ async function load(){state=await api('/api/state');$('#login').hidden=true;$('#
 async function run(action){try{await action();}catch(e){toast(e.message);}}
 $('#loginForm').onsubmit=async e=>{e.preventDefault();const btn=e.target.querySelector('button');btn.disabled=true;try{await api('/api/login',{method:'POST',body:JSON.stringify({password:e.target.password.value})});e.target.reset();await load();}catch(err){$('#loginError').textContent=err.message;}finally{btn.disabled=false;}};
 $('#logout').onclick=()=>run(async()=>{await api('/api/logout',{method:'POST'});state={events:[],tasks:[]};$('#app').hidden=true;$('#login').hidden=false;});
+
+function referenceTime(m){return String(Math.floor(m/60)%12 || 12)+':'+String(m%60).padStart(2,'0');}
+function renderTable(){
+  const weekend=[5,6].some(i=>state.events.some(e=>occurs(e,plus(week,i))));
+  const total=weekend?7:5;
+  const lists=Array.from({length:total},(_,i)=>state.events.filter(e=>occurs(e,plus(week,i))).sort((a,b)=>a.start-b.start));
+  const earlyRows=Math.max(1,...lists.map(list=>list.filter(e=>e.start<930).length));
+  const card=(e,date)=>{
+    const n=state.tasks.filter(t=>t.eventId===e.id && t.date===date && !t.done).length;
+    return '<div class="event '+e.color+'" data-id="'+e.id+'" data-date="'+date+'"><button class="event-content" aria-label="'+esc(e.title)+' 상세 보기"><strong class="table-time">'+referenceTime(e.start)+'–'+referenceTime(e.end)+'</strong><span class="table-title">'+esc(e.title)+'</span>'+(e.place?'<span class="table-note">'+esc(e.place)+'</span>':'')+(n?'<small class="table-task-count">준비할 것 '+n+'개</small>':'')+'</button></div>';
+  };
+  let html='<div class="reference-board" style="--days:'+total+';--early-rows:'+earlyRows+'" role="group" aria-label="주간 수업 시간표">';
+  for(let i=0;i<total;i++)html+='<div class="board-day">'+days[i]+'</div>';
+  for(let i=0;i<total;i++){
+    const date=plus(week,i),list=lists[i];
+    html+='<div class="board-column"><div class="board-early">'+list.filter(e=>e.start<930).map(e=>card(e,date)).join('')+'</div><div class="board-late">'+list.filter(e=>e.start>=930).map(e=>card(e,date)).join('')+'</div></div>';
+  }
+  return html+'</div>';
+}
+$('#tableView').onclick=()=>{view='table';render();};
+$('#timelineView').onclick=()=>{view='timeline';render();};
+
 function render(){
   const end=plus(week,6);$('#weekTitle').textContent=`${week.slice(0,4)}. ${Number(week.slice(5,7))}.${Number(week.slice(8))} – ${Number(end.slice(5,7))}.${Number(end.slice(8))}`;
   const visible=state.events.filter(e=>Array.from({length:7},(_,i)=>plus(week,i)).some(d=>occurs(e,d)));
@@ -37,7 +59,12 @@ function render(){
     for(const g of groups)for(const {e,lane} of g.items){count++;const n=state.tasks.filter(t=>t.eventId===e.id && t.date===date && !t.done).length;html+=`<div class="event ${e.color}" data-id="${e.id}" data-date="${date}" style="top:${e.start-first}px;height:${e.end-e.start}px;left:calc(${lane/g.lanes.length*100}% + 3px);width:calc(${100/g.lanes.length}% - 6px)"><button class="move-handle" aria-label="${esc(e.title)} 이동. 방향키로 시간과 요일 조정">⠿</button><button class="event-content" aria-label="${esc(e.title)} 상세 보기"><b>${esc(e.title)}</b><span>${time(e.start)} – ${time(e.end)}</span>${e.end-e.start>=70?`<div>${esc(e.place)}</div>`:''}${n && e.end-e.start>=90?`<div>준비할 것 ${n}개</div>`:''}</button><button class="resize-handle" aria-label="${esc(e.title)} 시간 늘리기. 위아래 방향키로 조정">━</button></div>`;}
     html+='</div>';
   }
-  html+='</div>';$('#calendar').innerHTML=html;$('#count').innerHTML=`${count}<span>개의 수업</span>`;
+  html+='</div>';
+  $('.calendar-card').classList.toggle('table-mode',view==='table');
+  $('#tableView').setAttribute('aria-pressed',String(view==='table'));
+  $('#timelineView').setAttribute('aria-pressed',String(view==='timeline'));
+  $('#viewHint').textContent=view==='table'?'모든 수업은 오후 시간입니다. 수업을 누르면 수정할 수 있어요.':'손잡이를 드래그해 이동하거나 길이를 조절하세요. 세부 시간은 수업을 눌러 1분 단위로 입력할 수 있어요.';
+  $('#calendar').innerHTML=view==='table'?renderTable():html;$('#count').innerHTML=`${count}<span>개의 수업</span>`;
   const items=state.tasks.filter(t=>t.date>=week && t.date<=end).sort((a,b)=>Number(a.done)-Number(b.done)||a.date.localeCompare(b.date));
   $('#taskCount').textContent=items.filter(t=>!t.done).length;
   $('#taskList').innerHTML=items.length?items.map(t=>{const e=state.events.find(e=>e.id===t.eventId);return `<div class="task-item ${t.done?'done':''}"><input type="checkbox" data-task="${t.id}" ${t.done?'checked':''} aria-label="${esc(t.text)} 완료"><div><small>${Number(t.date.slice(5,7))}/${Number(t.date.slice(8))} · ${esc(e?.title || '')} · ${t.kind}</small><p>${esc(t.text)}</p>${t.photoId?`<a href="/api/photos/${t.photoId}" target="_blank" rel="noopener">원본 사진</a> `:''}<button class="quiet" data-delete-task="${t.id}">삭제</button></div></div>`;}).join(''):'<p class="empty">아직 챙길 항목이 없어요.<br>사진이나 메모로 추가해 보세요.</p>';

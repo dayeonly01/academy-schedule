@@ -1,0 +1,42 @@
+/* Reference timetable: five equal columns, grey headings and pastel cells. */
+:root{background:#fff;color:#111}
+header{background:#fff;border-bottom:1px solid #ddd;height:72px;padding:0 28px}
+.logo{color:#222;font-size:28px;letter-spacing:-1px}.logo i{display:none}
+main{max-width:1480px;padding:24px 28px 40px}
+.intro{margin-bottom:20px}.intro .eyebrow{display:none}.intro h1{font-size:24px}
+.layout{display:block}.calendar-card{border:0;border-radius:0;overflow:visible}
+.calendar-toolbar{padding:0 0 12px;flex-wrap:wrap}.week-nav h2{font-size:17px}
+.hint{margin:0 0 14px;color:#666;font-size:14px}
+.view-switch{display:flex;gap:0;border:1px solid #ccc;border-radius:6px;overflow:hidden}
+.view-switch button{border:0;border-radius:0;font-size:14px;padding:8px 14px;font-weight:400}
+.view-switch button[aria-pressed=true]{background:#e5e5e5;color:#111;font-weight:700}
+.table-mode .calendar-scroll{max-height:none;overflow:auto;border:0}
+.reference-board{display:grid;grid-template-columns:repeat(var(--days),minmax(0,1fr));border-top:1px solid #888;border-left:1px solid #888;min-width:1000px;font-family:Arial,'Malgun Gothic',sans-serif}
+.board-day{background:#e5e5e5;border-right:1px solid #888;border-bottom:1px solid #888;padding:0 13px;font-size:30px;font-weight:400;line-height:1.2}
+.board-column{border-right:1px solid #888;border-bottom:1px solid #888;min-width:0;display:flex;flex-direction:column}
+.board-early{min-height:calc(96px * var(--early-rows));border-bottom:1px solid #888;display:flex;flex-direction:column}
+.board-late{flex:1;min-height:166px}
+.reference-board .event{position:static;border:0;border-radius:0;box-shadow:none;width:100%;min-height:124px;color:#000;overflow:visible;background:#fff}
+.reference-board .board-early .event{min-height:96px;flex:1}
+.reference-board .event+.event{border-top:1px solid #888}
+.reference-board .event.blue{background:#e3f2fc}
+.reference-board .event.green{background:#dcfcdc}
+.reference-board .event.yellow{background:#ffffd0}
+.reference-board .event.orange{background:#ffedcf}
+.reference-board .event.pink{background:#ffe4ef}
+.reference-board .event.purple{background:#eee4ff}
+.reference-board .event-content{padding:1px 12px 6px;display:block;color:#000;line-height:1.3;white-space:normal;font-weight:400;min-height:inherit}
+.reference-board .event-content:hover{background:#ffffff25}
+.table-time{display:block;font-size:38px;font-weight:700;letter-spacing:-1px;white-space:nowrap;line-height:1.23}
+.table-title,.table-note{display:block;font-size:28px;line-height:1.3;letter-spacing:-.6px;overflow-wrap:anywhere;white-space:pre-line}
+.table-note{letter-spacing:0}.table-task-count{display:block;margin-top:6px;font-size:14px;color:#333}
+.reference-board .event.yellow{min-height:166px}
+.table-mode .legend{border:0;padding:12px 0;font-size:13px;color:#666}
+.legend{gap:16px}aside{display:grid;grid-template-columns:minmax(300px,2fr) minmax(250px,1fr);gap:24px;margin-top:20px}
+.summary{display:none}.tasks{border-radius:6px;border-color:#ddd}.device-note{padding:16px;color:#555}.device-note p{font-size:14px}
+.event.yellow{background:#ffffd0;border-color:#d8d894;border-left-color:#c7bd4c;color:#635e20}
+.calendar-card:not(.table-mode) .calendar-scroll{border:1px solid #ddd;border-radius:0}
+.login{background:#f5f5f5}.login-card{border-radius:10px}.primary{background:#333;border-color:#333}.primary:hover{background:#111}
+@media(min-width:1350px){.reference-board{min-width:1100px}.table-time{font-size:40px}.table-title,.table-note{font-size:30px}.board-early{min-height:108px}.reference-board .board-early .event{min-height:108px}}
+@media(max-width:800px){header{padding:0 16px;height:62px}main{padding:20px 12px}.intro h1{font-size:22px}.intro{gap:14px}.calendar-toolbar{gap:12px}.hint{font-size:13px}.reference-board{min-width:1000px}.table-time{font-size:36px}.table-title,.table-note{font-size:27px}.board-day{font-size:28px}.table-mode .calendar-scroll{overflow-x:auto}aside{display:block;margin-top:14px}.device-note{margin-top:16px}.week-nav h2{font-size:16px}.view-switch button{font-size:13px;padding:7px 12px}}
+.reference-board .event-content{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left}

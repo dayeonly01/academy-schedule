@@ -26,5 +26,5 @@ export function validateEvent(value) {
   if (!value || typeof value.title !== 'string' || !value.title.trim() || value.title.length > 80) throw new Error('수업 이름은 1~80자로 입력해 주세요.');
   if (!validDate(value.date) || (value.until && (!validDate(value.until) || value.until < value.date))) throw new Error('날짜를 확인해 주세요.');
   if (!Number.isInteger(value.start) || !Number.isInteger(value.end) || value.start < 0 || value.end > 1440 || value.end <= value.start) throw new Error('시작·종료 시간을 확인해 주세요.');
-  return { title: value.title.trim(), date:value.date, start:value.start, end:value.end, repeat:!!value.repeat, until:value.until || '', remind:!!value.remind, place:String(value.place || '').slice(0,120), color:['blue','orange','green','pink','purple'].includes(value.color) ? value.color : 'blue' };
+  return { title: value.title.trim(), date:value.date, start:value.start, end:value.end, repeat:!!value.repeat, until:value.until || '', remind:!!value.remind, place:String(value.place || '').slice(0,120), color:['blue','yellow','orange','green','pink','purple'].includes(value.color) ? value.color : 'blue' };
 }
