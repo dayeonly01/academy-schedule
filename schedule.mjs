@@ -3,7 +3,8 @@ export function dateKey(ms) { return new Date(ms + 9 * 3600000).toISOString().sl
 export function validDate(s) { return /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().slice(0,10) === s; }
 export function atKST(date, minutes) { return Date.parse(`${date}T00:00:00+09:00`) + minutes * 60000; }
 export function occurs(event, date) {
-  return date >= event.date && (!event.until || date <= event.until) && (event.repeat ? (Date.parse(date) - Date.parse(event.date)) % (7 * DAY) === 0 : date === event.date);
+  const weekdays = event.repeatDays?.length ? event.repeatDays : [new Date(event.date).getUTCDay()];
+  return date >= event.date && (!event.until || date <= event.until) && (event.repeat ? weekdays.includes(new Date(date).getUTCDay()) : date === event.date);
 }
 export function dueNotifications(events, tasks, now) {
   const notices = [];
@@ -26,5 +27,11 @@ export function validateEvent(value) {
   if (!value || typeof value.title !== 'string' || !value.title.trim() || value.title.length > 80) throw new Error('수업 이름은 1~80자로 입력해 주세요.');
   if (!validDate(value.date) || (value.until && (!validDate(value.until) || value.until < value.date))) throw new Error('날짜를 확인해 주세요.');
   if (!Number.isInteger(value.start) || !Number.isInteger(value.end) || value.start < 0 || value.end > 1440 || value.end <= value.start) throw new Error('시작·종료 시간을 확인해 주세요.');
-  return { title: value.title.trim(), date:value.date, start:value.start, end:value.end, repeat:!!value.repeat, until:value.until || '', remind:!!value.remind, place:String(value.place || '').slice(0,120), color:['blue','yellow','orange','green','pink','purple'].includes(value.color) ? value.color : 'blue' };
+  let repeatDays = [];
+  if (value.repeat) {
+    const selected = value.repeatDays === undefined ? [new Date(value.date).getUTCDay()] : value.repeatDays;
+    if (!Array.isArray(selected) || !selected.length || selected.some(day=>!Number.isInteger(day) || day<0 || day>6)) throw new Error('반복 요일을 하나 이상 선택해 주세요.');
+    repeatDays = [...new Set(selected)].sort((a,b)=>a-b);
+  }
+  return { title: value.title.trim(), date:value.date, start:value.start, end:value.end, repeat:!!value.repeat, repeatDays, until:value.until || '', remind:!!value.remind, place:String(value.place || '').slice(0,120), color:['blue','yellow','orange','green','pink','purple'].includes(value.color) ? value.color : 'blue' };
 }

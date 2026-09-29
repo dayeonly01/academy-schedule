@@ -40,3 +40,17 @@ main{max-width:1480px;padding:24px 28px 40px}
 @media(min-width:1350px){.reference-board{min-width:1100px}.table-time{font-size:40px}.table-title,.table-note{font-size:30px}.board-early{min-height:108px}.reference-board .board-early .event{min-height:108px}}
 @media(max-width:800px){header{padding:0 16px;height:62px}main{padding:20px 12px}.intro h1{font-size:22px}.intro{gap:14px}.calendar-toolbar{gap:12px}.hint{font-size:13px}.reference-board{min-width:1000px}.table-time{font-size:36px}.table-title,.table-note{font-size:27px}.board-day{font-size:28px}.table-mode .calendar-scroll{overflow-x:auto}aside{display:block;margin-top:14px}.device-note{margin-top:16px}.week-nav h2{font-size:16px}.view-switch button{font-size:13px;padding:7px 12px}}
 .reference-board .event-content{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left}
+.reference-board .event{position:relative;min-height:130px;padding:22px 0 16px}
+.reference-board .board-early .event{min-height:130px}
+.reference-board .event-content{min-height:0}
+.reference-board .move-handle{position:absolute;top:0;left:0;height:22px;line-height:22px;font-size:12px;text-align:right;padding-right:10px;background:transparent;touch-action:none;cursor:grab}
+.reference-board .resize-handle{height:16px;line-height:13px;font-size:16px;background:#ffffff40;touch-action:none;cursor:ns-resize}
+.reference-board .move-handle:hover,.reference-board .resize-handle:hover{background:#0000000c}
+.reference-board .dragging{z-index:10;outline:2px solid #555;box-shadow:0 5px 20px #0003;opacity:.95}
+#repeatDaysBox{border:1px solid #dce2ed;border-radius:8px;margin:0 0 16px;padding:12px}
+#repeatDaysBox legend{font-size:14px;padding:0 5px}
+.weekday-options{display:flex;gap:8px;flex-wrap:wrap}
+.weekday-options label{display:flex;align-items:center;gap:5px;margin:0;padding:7px 9px;border:1px solid #ddd;border-radius:6px;cursor:pointer}
+.weekday-options label:has(input:checked){background:#e3f2fc;border-color:#728ea4}
+.weekday-options input{width:16px;height:16px;margin:0;accent-color:#333}
+.reference-board .board-early{min-height:calc(130px * var(--early-rows))}
